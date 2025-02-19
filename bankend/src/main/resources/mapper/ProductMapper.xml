@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.seckill_backend.mapper.ProductMapper">
+    <insert id="createProduct" keyProperty="product_id" useGeneratedKeys="true">
+        INSERT INTO product(name, price, stock, status,description)
+        VALUES (#{name}, #{price}, #{stock}, #{status}, #{description})
+    </insert>
+    <select id="getProduct" resultType="com.example.seckill_backend.model.Product">
+        SELECT * FROM product
+        limit #{page_size} offset #{offset}
+    </select>
+    <select id="getProductById" resultType="com.example.seckill_backend.model.Product">
+        SELECT * FROM product
+        <where>
+            <if test="product_id != null" >
+                product_id = #{product_id}
+            </if>
+        </where>
+    </select>
+    <update id="updateProduct" >
+        UPDATE product
+        <set>
+            <if test="name != null" >
+                name = #{name},
+            </if>
+            <if test="price != null" >
+                price = #{price},
+            </if>
+            <if test="stock != null" >
+                stock = #{stock},
+            </if>
+            <if test="status != null" >
+                status = #{status},
+            </if>
+        </set>
+        WHERE product_id = #{product_id}
+    </update>
+    <delete id="deleteProduct">
+        DELETE FROM product WHERE product_id = #{product_id}
+    </delete>
+    <select id="getProductByName" resultType="com.example.seckill_backend.model.Product">
+        SELECT * FROM product
+        <where>
+            <if test="name != null and name!=''">
+                name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        limit #{page_size} offset #{offset}
+    </select>
+    <select id="getProductCountByName" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM product
+        <where>
+            <if test="name != null and name!=''">
+                name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+    <select id="descreaseStock" resultType="java.lang.Integer">
+        UPDATE product SET stock = stock - #{num} WHERE product_id = #{product_id} AND stock > 0
+    </select>
+    <select id="getProductCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM product
+    </select>
+
+    <select id="getCollectByName" resultType="com.example.seckill_backend.model.Product">
+            SELECT * FROM product where product_id in (
+                SELECT product_id FROM collect_view
+                <where>
+                    <if test="user_id != null" >
+                        user_id = #{user_id}
+                    </if>
+                    <if test="product_name != null and product_name!=''">
+                        AND product_name LIKE CONCAT('%', #{product_name}, '%')
+                    </if>
+                </where>
+            )
+    </select>
+
+    <select id="getPopularProductCount" resultType="java.lang.Integer">
+        select count(*) from product where product_id in (
+            select product_id from orders
+            group by product_id
+            order by count(*) desc
+        )
+    </select>
+
+    <select id="getPopularProduct" resultType="com.example.seckill_backend.model.Product">
+        select * from product where product_id in (
+            select product_id from orders
+            group by product_id
+            order by count(*) desc
+            )
+            limit #{pageSize} offset #{offset}
+    </select>
+</mapper>

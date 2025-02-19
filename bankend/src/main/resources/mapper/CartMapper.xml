@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.seckill_backend.mapper.CartMapper">
+    <insert id="addCart" >
+        INSERT INTO cart(user_id, product_id, num)
+        VALUES (#{user_id}, #{product_id}, #{quantity})
+    </insert>
+    <select id="getCartByName" parameterType="com.example.seckill_backend.model.CartView" resultType="com.example.seckill_backend.model.CartView">
+        SELECT * FROM cart_view
+        <if test="product_name != null and product_name != ''">
+            WHERE product_name = #{product_name}
+        </if>
+    </select>
+    <update id="addNum" >
+        UPDATE cart
+        SET num = num + #{quantity}
+        WHERE user_id = #{user_id} AND product_id = #{product_id}
+    </update>
+</mapper>
